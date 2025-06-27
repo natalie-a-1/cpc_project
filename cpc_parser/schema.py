@@ -32,7 +32,7 @@ class Question(BaseModel):
     
     stem: str = Field(
         ..., 
-        min_length=10,
+        min_length=3,
         description="The main question text"
     )
     

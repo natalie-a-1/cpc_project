@@ -56,16 +56,16 @@ class TestQuestion:
         assert "less than or equal to 100" in str(exc_info.value)
     
     def test_stem_validation(self):
-        """Test stem must be at least 10 characters."""
+        """Test stem must be at least 3 characters."""
         with pytest.raises(ValidationError) as exc_info:
             Question(
                 id=1,
-                stem="Short?",
+                stem="Hi",  # Only 2 characters
                 options={"A": "a", "B": "b", "C": "c", "D": "d"},
                 correct_answer_letter="A",
                 correct_answer_text="a"
             )
-        assert "at least 10 characters" in str(exc_info.value)
+        assert "at least 3 characters" in str(exc_info.value)
     
     def test_stem_cleaning(self):
         """Test stem whitespace cleaning and punctuation."""
