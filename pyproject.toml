@@ -7,7 +7,8 @@ readme = "README.md"
 packages = [
     { include = "cpc_parser" },
     { include = "cpc_benchmark" },
-    { include = "cpc_finetune" }
+    { include = "cpc_finetune" },
+    { include = "cpc_tools" }
 ]
 
 [tool.poetry.dependencies]
@@ -25,6 +26,11 @@ colorama = "^0.4.6"
 pydantic = "^2.0.0"
 tenacity = "^9.0.0"
 pdfplumber = "^0.11.7"
+faiss-cpu = "^1.7.0"
+tiktoken = "^0.5.0"
+loguru = "^0.7.0"
+xlrd = "^2.0.0"
+openpyxl = "^3.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
@@ -52,7 +58,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=cpc_parser --cov=cpc_benchmark --cov=cpc_finetune --cov-report=term-missing"
+addopts = "-v --cov=cpc_parser --cov=cpc_benchmark --cov=cpc_finetune --cov=cpc_tools --cov-report=term-missing"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
