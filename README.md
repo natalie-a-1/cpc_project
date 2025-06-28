@@ -1,42 +1,50 @@
-### CPC Project — Quick Overview
+# CPC Medical Coding Agent
 
-This repo contains a **lean, end-to-end pipeline** to:
+Simple ReAct AI agent for CPC (Certified Professional Coder) certification exam questions using OpenAI function calling and real-time medical APIs.
 
-1. **Parse** CPC-practice PDF file `./data/raw/cpc_test.pdf` into clean `dataset.jsonl`
-   *each record has* **stem + options + answer + explanation**
+## Architecture
 
-2. **Benchmark** three frontier models
-   *GPT-4o, Claude 3.6 Sonnet, Gemini 1.5*
-   → generates a scoreboard of raw accuracies & error sets
+**🎯 Simple ReAct Controller**: One agent with function calling tools - no child agents or complex orchestration.
 
-3. **Fine-tune** an OpenAI chat model (GPT-3.5-turbo or GPT-4o-mini) on the same data
-   → re-evaluate to show cost-efficient gains or parity with GPT-4-class baselines
+### Available Tools:
+1. **HCPCS Search** - Medical equipment, supplies, prosthetics (K0001, E0100, etc.)
+2. **ICD-10-CM Search** - Diagnosis codes (I10, E11.9, etc.)
+3. **Procedures Search** - Medical procedures and surgeries
+4. **Conditions Search** - Medical conditions with ICD mappings
+5. **Medical Terminology Lookup** - Prefixes, suffixes, anatomy, coding guidelines
 
-Directory highlights
+The model autonomously picks which tools to use based on the question content.
 
-```
-cpc_parser/     # PDF → JSONL
-cpc_benchmark/  # prompt builder, evaluation harness, metrics
-cpc_finetune/   # build fine-tune files, launch FT job, re-run eval
-scripts/        # one-command wrappers (parse, benchmark, fine-tune, report)
-tests/          # pytest for parser & metrics
-data/processed/ # auto-generated JSONL & prediction CSVs (git-ignored)
-```
-
-Run it top-to-bottom:
+## Quick Start
 
 ```bash
-# 1) parse PDFs
-./scripts/parse_all.sh
+# Add your OpenAI API key
+echo "OPENAI_API_KEY=your_api_key_here" > .env
 
-# 2) benchmark gpt-4o / claude / gemini
-./scripts/benchmark_all.sh
-
-# 3) fine-tune + re-evaluate
-./scripts/finetune_and_eval.sh
-
-# 4) render final scoreboard
-./scripts/make_report.sh
+# Run interactive mode
+python scripts/run_cpc_agent.py
 ```
 
-The goal: **beat the 70 % pass mark and ideally edge past GPT-4o raw performance while spending a fraction of the tokens.**
+## How It Works
+
+1. **Question Analysis**: Agent analyzes the CPC question
+2. **Tool Selection**: Model decides which APIs/resources to query
+3. **Information Gathering**: Executes function calls to gather relevant data
+4. **Answer Generation**: Synthesizes information to pick the correct answer (A, B, C, or D)
+
+## Example Flow
+
+```
+Question: "What is the ICD-10 code for essential hypertension?"
+Options: A) I10, B) I11.9, C) I12.9, D) I13.10
+
+Agent thinks → Calls search_icd10cm("essential hypertension") → 
+Gets results → Compares with options → Returns "A"
+```
+
+## Cost Estimates
+
+- **GPT-4o-mini**: ~$0.50 per 100 questions
+- **GPT-4-turbo**: ~$15 per 100 questions
+
+CPC exam: 100 questions, 70% pass rate required.

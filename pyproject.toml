@@ -5,17 +5,22 @@ description = "CPC Practice Test Pipeline - Parse, Benchmark, and Fine-tune"
 authors = ["natalie-a-1 <nataliehill1324@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = "cpc_parser" },
-    { include = "cpc_benchmark" },
-    { include = "cpc_finetune" },
-    { include = "cpc_tools" }
+    { include = "cpc_tools" },
+    { include = "cpc_agent" },
+    { include = "apis" },
+    { include = "scripts" }
 ]
+
+[tool.poetry.scripts]
+cpc-test = "main:main"
+cpc-analytics = "analyze_results:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 pandas = "^2.0.0"
 numpy = "^1.24.0"
 openai = "^1.0.0"
+openai-agents = "^0.1.0"
 anthropic = "^0.55.0"
 google-generativeai = "^0.8.5"
 python-dotenv = "^1.0.0"
@@ -31,6 +36,7 @@ tiktoken = "^0.5.0"
 loguru = "^0.7.0"
 xlrd = "^2.0.0"
 openpyxl = "^3.1.0"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
@@ -58,7 +64,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=cpc_parser --cov=cpc_benchmark --cov=cpc_finetune --cov=cpc_tools --cov-report=term-missing"
+addopts = "-v --cov=cpc_tools --cov=cpc_agent --cov=apis --cov=scripts --cov-report=term-missing"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
