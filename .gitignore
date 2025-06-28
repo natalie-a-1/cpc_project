@@ -148,6 +148,7 @@ cython_debug/
 
 # Project specific
 data/processed/
+data/raw/
 results/
 *.jsonl
 *.csv

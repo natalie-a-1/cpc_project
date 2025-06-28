@@ -135,6 +135,8 @@ class OpenAIProvider(ModelProvider):
             return {'input': 2.5, 'output': 10.0}  # $2.50/$10.00 per 1M tokens
         elif self.model_name == "gpt-4o-mini":
             return {'input': 0.15, 'output': 0.60}  # $0.15/$0.60 per 1M tokens
+        elif self.model_name == "gpt-3.5-turbo":
+            return {'input': 0.5, 'output': 1.5}  # $0.50/$1.50 per 1M tokens
         else:
             # Default GPT-4 pricing
             return {'input': 30.0, 'output': 60.0}
