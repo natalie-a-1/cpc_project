@@ -4,14 +4,14 @@
 
 This system leverages the **OpenAI Agent Framework**, along with **Function Tools** and **WebTools** to successfully pass the CPC practice exam.
 
-### ✨ **Key Innovations**
+### **Key Innovations**
 - **Multi-Agent Intelligence**: 5 specialized AI agents work together like a coding team
 - **Medical Database Integration**: Direct access to Clinical Tables NLM databases
 - **Smart Question Analysis**: Automatically routes questions to the right specialist
 - **Confidence Scoring**: Each answer includes reliability metrics
 - **Session Analytics**: Track performance and identify improvement areas
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 graph LR
@@ -28,7 +28,7 @@ graph LR
     H --> I[Session Analytics]
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -59,10 +59,10 @@ print(f"Recommended code: {answer}")  # Returns: A, B, C, or D
 
 ## 📦 Project Structure
 
-### 🤖 **[CPC Agent System](cpc_agent/README.md)**
+### **[CPC Agent System](cpc_agent/README.md)**
 Multi-agent framework with 5 specialized AI agents for medical coding expertise
 
-### 🏥 **[Medical Coding APIs](apis/README.md)**
+### **[Medical Coding APIs](apis/README.md)**
 Comprehensive database access for medical coding standards (Conditions, Procedures, ICD-10-CM, HCPCS)
 
 ### 🛠️ **Additional Tools**

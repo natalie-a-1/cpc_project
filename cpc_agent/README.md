@@ -4,7 +4,7 @@ Multi-agent system for CPC exam preparation and medical coding assistance. Uses 
 
 ## Architecture
 
-### 🎯 **Main Components**
+### **Main Components**
 - **[CPCAgent](agent.py)**: Main orchestrator that coordinates all agents
 - **[Question Analyzer](agents/question_analyzer.py)**: Routes questions to appropriate specialists  
 - **[Logging System](logger.py)**: Tracks performance and saves results
@@ -12,26 +12,26 @@ Multi-agent system for CPC exam preparation and medical coding assistance. Uses 
 
 ### 🧠 **Specialized Agents**
 
-#### 🏥 **[CPT Specialist](agents/cpt_specialist.py)**
+#### **[CPT Specialist](agents/cpt_specialist.py)**
 Expert in Current Procedural Terminology codes for medical procedures.
 - Surgical, anesthesia, radiology, lab, and E&M codes
 - Anatomical precision and procedure complexity analysis
 
-#### 🛠️ **[HCPCS Specialist](agents/hcpcs_specialist.py)**
+#### **[HCPCS Specialist](agents/hcpcs_specialist.py)**
 Expert in Level II HCPCS codes for equipment and supplies.
 - DME, prosthetics, drugs, medical supplies
 - Integration with [HCPCS database](https://clinicaltables.nlm.nih.gov/apidoc/hcpcs/v3/doc.html)
 
-#### 📋 **[ICD-10 Specialist](agents/icd10_specialist.py)**
+#### **[ICD-10 Specialist](agents/icd10_specialist.py)**
 Expert in diagnostic codes and medical conditions.
 - Complete ICD-10-CM diagnostic code set
 - Integration with [ICD-10-CM database](https://clinicaltables.nlm.nih.gov/apidoc/icd10cm/v3/doc.html)
 
-#### 🧬 **[Medical Knowledge Agent](agents/medical_knowledge_agent.py)**
+#### **[Medical Knowledge Agent](agents/medical_knowledge_agent.py)**
 Expert in medical terminology, anatomy, and coding guidelines.
 - HIPAA, Medicare guidelines, NCCI edits, modifier usage
 
-### 🔄 **Agent Orchestration Flow**
+### **Agent Orchestration Flow**
 
 ```mermaid
 graph TD
