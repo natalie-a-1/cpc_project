@@ -1,5 +1,7 @@
 # CPC Multi-Agent Medical Coding System
 
+📖 **[Notion Documentation](https://triangular-nautilus-099.notion.site/CPC-Multi-Agent-Medical-Coder-21ec4614686e80368d9ed1a38d86ec61?pvs=143)**
+
 > *AI agent for Certified Professional Coder (CPC) exam*
 
 This system leverages the **OpenAI Agent Framework**, along with **Function Tools** and **WebTools** to successfully pass the CPC practice exam.
