@@ -1,50 +1,79 @@
-# CPC Medical Coding Agent
+# CPC Multi-Agent Medical Coding System
 
-Simple ReAct AI agent for CPC (Certified Professional Coder) certification exam questions using OpenAI function calling and real-time medical APIs.
+> *AI agent for Certified Professional Coder (CPC) exam*
 
-## Architecture
+This system leverages the **OpenAI Agent Framework**, along with **Function Tools** and **WebTools** to successfully pass the CPC practice exam.
 
-**🎯 Simple ReAct Controller**: One agent with function calling tools - no child agents or complex orchestration.
+### ✨ **Key Innovations**
+- **Multi-Agent Intelligence**: 5 specialized AI agents work together like a coding team
+- **Medical Database Integration**: Direct access to Clinical Tables NLM databases
+- **Smart Question Analysis**: Automatically routes questions to the right specialist
+- **Confidence Scoring**: Each answer includes reliability metrics
+- **Session Analytics**: Track performance and identify improvement areas
 
-### Available Tools:
-1. **HCPCS Search** - Medical equipment, supplies, prosthetics (K0001, E0100, etc.)
-2. **ICD-10-CM Search** - Diagnosis codes (I10, E11.9, etc.)
-3. **Procedures Search** - Medical procedures and surgeries
-4. **Conditions Search** - Medical conditions with ICD mappings
-5. **Medical Terminology Lookup** - Prefixes, suffixes, anatomy, coding guidelines
+## 🏗️ Architecture Overview
 
-The model autonomously picks which tools to use based on the question content.
+```mermaid
+graph LR
+    A[Medical Question] --> B[Question Analyzer]
+    B --> C{Question Type}
+    C -->|CPT| D[CPT Specialist]
+    C -->|HCPCS| E[HCPCS Specialist] 
+    C -->|ICD-10| F[ICD-10 Specialist]
+    C -->|Medical| G[Medical Expert]
+    D --> H[Answer + Confidence]
+    E --> H
+    F --> H
+    G --> H
+    H --> I[Session Analytics]
+```
 
-## Quick Start
+## 🚀 Quick Start
 
+### Prerequisites
+- Python 3.8+
+- [Poetry](https://python-poetry.org/) for dependency management
+- OpenAI API key
+
+### Installation
 ```bash
-# Add your OpenAI API key
-echo "OPENAI_API_KEY=your_api_key_here" > .env
-
-# Run interactive mode
-python scripts/run_cpc_agent.py
+git clone https://github.com/yourusername/cpc_project.git
+cd cpc_project
+poetry install  # Creates virtual environment and installs dependencies
 ```
 
-## How It Works
+### Basic Usage
+```python
+from cpc_agent import CPCAgent
 
-1. **Question Analysis**: Agent analyzes the CPC question
-2. **Tool Selection**: Model decides which APIs/resources to query
-3. **Information Gathering**: Executes function calls to gather relevant data
-4. **Answer Generation**: Synthesizes information to pick the correct answer (A, B, C, or D)
+# Initialize the system (Poetry manages the virtual environment)
+agent = CPCAgent(api_key="your_openai_api_key")
 
-## Example Flow
+# Ask a medical coding question
+question = {"stem": "Patient receives MRI brain without contrast", "id": "q001"}
+options = {"A": "70551", "B": "70552", "C": "70553", "D": "70554"}
 
-```
-Question: "What is the ICD-10 code for essential hypertension?"
-Options: A) I10, B) I11.9, C) I12.9, D) I13.10
-
-Agent thinks → Calls search_icd10cm("essential hypertension") → 
-Gets results → Compares with options → Returns "A"
+answer = agent.answer_question(question, options)
+print(f"Recommended code: {answer}")  # Returns: A, B, C, or D
 ```
 
-## Cost Estimates
+## 📦 Project Structure
 
-- **GPT-4o-mini**: ~$0.50 per 100 questions
-- **GPT-4-turbo**: ~$15 per 100 questions
+### 🤖 **[CPC Agent System](cpc_agent/README.md)**
+Multi-agent framework with 5 specialized AI agents for medical coding expertise
 
-CPC exam: 100 questions, 70% pass rate required.
+### 🏥 **[Medical Coding APIs](apis/README.md)**
+Comprehensive database access for medical coding standards (Conditions, Procedures, ICD-10-CM, HCPCS)
+
+### 🛠️ **Additional Tools**
+- **`main.py`**: Command-line interface for batch processing
+- **`analyze_results.py`**: Performance analysis and reporting
+- **`scripts/`**: Data processing and utility scripts
+
+### 🔧 **Environment Management**
+This project uses [Poetry](https://python-poetry.org/docs/basic-usage/) for dependency management and virtual environments:
+```bash
+poetry shell          # Activate virtual environment
+poetry run python     # Run Python scripts
+poetry add <package>   # Add new dependencies
+```
