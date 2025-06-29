@@ -8,7 +8,8 @@ packages = [
     { include = "cpc_tools" },
     { include = "cpc_agent" },
     { include = "apis" },
-    { include = "scripts" }
+    { include = "scripts" },
+    { include = "cpc_parser" }
 ]
 
 [tool.poetry.scripts]
@@ -64,7 +65,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=cpc_tools --cov=cpc_agent --cov=apis --cov=scripts --cov-report=term-missing"
+addopts = "-v --cov=cpc_tools --cov=cpc_agent --cov=apis --cov=scripts --cov=cpc_parser --cov-report=term-missing"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
