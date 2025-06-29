@@ -65,6 +65,9 @@ Multi-agent framework with 5 specialized AI agents for medical coding expertise
 ### **[Medical Coding APIs](apis/README.md)**
 Comprehensive database access for medical coding standards (Conditions, Procedures, ICD-10-CM, HCPCS)
 
+### **[CPC Parser](cpc_parser/README.md)**
+PDF parsing engine for extracting structured question data from CPC practice test files
+
 ### 🛠️ **Additional Tools**
 - **`main.py`**: Command-line interface for batch processing
 - **`analyze_results.py`**: Performance analysis and reporting
