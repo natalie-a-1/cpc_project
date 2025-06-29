@@ -1,142 +1,189 @@
 #!/usr/bin/env python3
 """
-Simple CPC Test Analytics Viewer
+CPC Test Results Analyzer
+Analyzes test results to identify patterns in missed questions
 """
+
 import json
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from collections import Counter
+from typing import Dict, List
+from datetime import datetime
 
-def load_recent_sessions(limit: int = 10) -> List[Dict[str, Any]]:
-    """Load recent test sessions"""
-    results_dir = Path("cpc_tests")
-    if not results_dir.exists():
-        print("No test results found. Run a CPC test first.")
-        return []
-    
-    session_files = list(results_dir.glob("session_summary_*.json"))
-    session_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-    
-    sessions = []
-    for session_file in session_files[:limit]:
-        try:
-            with open(session_file, 'r') as f:
-                sessions.append(json.load(f))
-        except Exception as e:
-            print(f"Error loading {session_file}: {e}")
-    
-    return sessions
+def load_results(json_file: str) -> Dict:
+    """Load test results from JSON file"""
+    try:
+        with open(json_file, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: File {json_file} not found")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON in {json_file}")
+        sys.exit(1)
 
-def print_session_summary(session: Dict[str, Any]):
-    """Print a summary of a test session"""
-    perf = session['performance']
-    print(f"\n📊 Session: {session['session_id']} ({session['timestamp'][:19]})")
-    print(f"   Score: {perf['correct_answers']}/{perf['total_questions']} ({perf['score_percentage']}%) - {perf['pass_status']}")
-    print(f"   Duration: {perf['total_duration_minutes']} min ({perf['avg_time_per_question_seconds']}s per question)")
-    
-    # Tool usage
-    tool_analytics = session['tool_analytics']
-    print(f"   Tools: {tool_analytics['total_tool_calls']} calls, {tool_analytics['tools_per_question_avg']} avg per question")
-    
-    # Top 3 most used tools
-    top_tools = list(tool_analytics['tool_frequency'].items())[:3]
-    if top_tools:
-        tools_str = ", ".join([f"{tool}({count})" for tool, count in top_tools])
-        print(f"   Most used: {tools_str}")
+def extract_category_from_tools(tools_used: List[str]) -> str:
+    """Extract the specialist category from tools_used list"""
+    for tool in tools_used:
+        if "_Specialist" in tool:
+            # Extract category from "CPT_Specialist" -> "CPT"
+            return tool.replace("_Specialist", "")
+    return "Unknown"
 
-def print_category_analysis(sessions: List[Dict[str, Any]]):
-    """Print category performance analysis across sessions"""
-    print("\n📈 CPC CODING SYSTEM PERFORMANCE")
-    print("="*50)
+def analyze_missed_categories(results: Dict) -> Dict[str, int]:
+    """Analyze which categories were missed most often"""
+    missed_categories = []
     
-    category_totals = {}
+    for result in results.get("detailed_results", []):
+        if not result.get("is_correct", True):  # Question was missed
+            tools_used = result.get("tools_used", [])
+            category = extract_category_from_tools(tools_used)
+            missed_categories.append(category)
     
-    for session in sessions:
-        for category, stats in session['category_performance'].items():
-            if category not in category_totals:
-                category_totals[category] = {'total': 0, 'correct': 0}
-            category_totals[category]['total'] += stats['total']
-            category_totals[category]['correct'] += stats['correct']
-    
-    # Calculate overall percentages
-    for category, totals in category_totals.items():
-        accuracy = (totals['correct'] / totals['total']) * 100 if totals['total'] > 0 else 0
-        category_totals[category]['accuracy'] = accuracy
-    
-    # Sort with main coding systems first, then uncategorized
-    priority_order = ['HCPCS', 'ICD', 'CPT', '']
-    sorted_categories = []
-    
-    for category in priority_order:
-        if category in category_totals:
-            sorted_categories.append((category, category_totals[category]))
-    
-    # Add any other categories that might exist
-    for category, stats in category_totals.items():
-        if category not in priority_order:
-            sorted_categories.append((category, stats))
-    
-    for category, stats in sorted_categories:
-        category_name = category if category else "Uncategorized"
-        print(f"{category_name:15} {stats['accuracy']:5.1f}% ({stats['correct']:3d}/{stats['total']:3d})")
-    
-    # Show insights if we have main categories
-    main_categories = {k: v for k, v in category_totals.items() if k in ['HCPCS', 'ICD', 'CPT']}
-    if main_categories:
-        worst_system = min(main_categories.items(), key=lambda x: x[1]['accuracy'])
-        print(f"\n💡 Focus area: {worst_system[0]} coding system ({worst_system[1]['accuracy']:.1f}% accuracy)")
+    return Counter(missed_categories)
 
-def print_error_analysis(sessions: List[Dict[str, Any]]):
-    """Print common error patterns"""
-    print("\n🔍 ERROR PATTERN ANALYSIS")
-    print("="*50)
+def save_analysis_to_json(analysis_data: Dict, input_file: str) -> str:
+    """Save analysis results to JSON file"""
+    input_path = Path(input_file)
+    # Create output filename based on input file
+    output_filename = f"analysis_report_{input_path.stem.replace('session_summary_', '')}.json"
+    output_path = input_path.parent / output_filename
     
-    all_errors = {}
-    slow_questions = []
+    try:
+        with open(output_path, 'w') as f:
+            json.dump(analysis_data, f, indent=2, default=str)
+        return str(output_path)
+    except Exception as e:
+        print(f"Error saving analysis to JSON: {e}")
+        return None
+
+def print_and_analyze(results: Dict, input_file: str) -> Dict:
+    """Print comprehensive analysis and return structured data for JSON export"""
+    print("=" * 60)
+    print("CPC TEST RESULTS ANALYSIS")
+    print("=" * 60)
     
-    for session in sessions:
-        error_analysis = session['error_analysis']
+    # Overall performance
+    performance = results.get("performance", {})
+    total = performance.get("total_questions", 0)
+    correct = performance.get("correct_answers", 0)
+    missed = total - correct
+    
+    print(f"\n📊 OVERALL PERFORMANCE:")
+    print(f"   Total Questions: {total}")
+    print(f"   Correct Answers: {correct}")
+    print(f"   Missed Questions: {missed}")
+    print(f"   Score: {performance.get('score_percentage', 0)}%")
+    print(f"   Status: {performance.get('pass_status', 'Unknown')}")
+    
+    # Analyze missed categories
+    missed_categories = analyze_missed_categories(results)
+    
+    # Initialize analysis data structure
+    analysis_data = {
+        "analysis_timestamp": datetime.now().isoformat(),
+        "source_file": input_file,
+        "overall_performance": {
+            "total_questions": total,
+            "correct_answers": correct,
+            "missed_questions": missed,
+            "score_percentage": performance.get('score_percentage', 0),
+            "status": performance.get('pass_status', 'Unknown'),
+            "duration_minutes": performance.get('total_duration_minutes', 0)
+        },
+        "missed_categories_analysis": {
+            "categories": dict(missed_categories.most_common()) if missed_categories else {},
+            "most_common_category": None,
+            "detailed_missed_questions": []
+        }
+    }
+    
+    print(f"\n❌ MISSED QUESTIONS BY CATEGORY:")
+    if not missed_categories:
+        print("   No missed questions found!")
+        return analysis_data
+    
+    # Sort by frequency (most missed first)
+    sorted_categories = missed_categories.most_common()
+    
+    for i, (category, count) in enumerate(sorted_categories, 1):
+        percentage = (count / missed) * 100
+        print(f"   {i}. {category}: {count} questions ({percentage:.1f}% of missed)")
+    
+    # Highlight the most common missed category
+    if sorted_categories:
+        most_missed_category, most_missed_count = sorted_categories[0]
+        analysis_data["missed_categories_analysis"]["most_common_category"] = {
+            "category": most_missed_category,
+            "count": most_missed_count,
+            "percentage_of_missed": (most_missed_count / missed) * 100
+        }
         
-        # Collect error categories
-        for category, count in error_analysis['errors_by_category'].items():
-            all_errors[category] = all_errors.get(category, 0) + count
+        print(f"\n🎯 MOST COMMON MISSED CATEGORY:")
+        print(f"   {most_missed_category} - {most_missed_count} questions missed")
         
-        # Collect slow questions
-        slow_questions.extend(error_analysis['slow_processing_questions'])
+        # Show and collect specific missed questions for the top category
+        print(f"\n📝 MISSED {most_missed_category} QUESTIONS:")
+        question_count = 0
+        missed_questions_details = []
+        
+        for result in results.get("detailed_results", []):
+            if not result.get("is_correct", True):
+                tools_used = result.get("tools_used", [])
+                category = extract_category_from_tools(tools_used)
+                if category == most_missed_category:
+                    question_count += 1
+                    question_id = result.get("question_id", "Unknown")
+                    stem = result.get("question_stem", "")
+                    agent_answer = result.get("agent_answer", "?")
+                    correct_answer = result.get("correct_answer", "?")
+                    
+                    # Add to detailed analysis data
+                    missed_questions_details.append({
+                        "question_id": question_id,
+                        "question_stem": stem,
+                        "agent_answer": agent_answer,
+                        "correct_answer": correct_answer,
+                        "category": category
+                    })
+                    
+                    # Print (limit display to first 5)
+                    if question_count <= 5:
+                        stem_display = stem[:80] + "..." if len(stem) > 80 else stem
+                        print(f"   Q{question_id}: {stem_display}")
+                        print(f"        Agent: {agent_answer} | Correct: {correct_answer}")
+                    elif question_count == 6:
+                        remaining = most_missed_count - 5
+                        if remaining > 0:
+                            print(f"        ... and {remaining} more (see JSON for full details)")
+        
+        analysis_data["missed_categories_analysis"]["detailed_missed_questions"] = missed_questions_details
     
-    # Print most common error categories
-    print("Most common error categories:")
-    sorted_errors = sorted(all_errors.items(), key=lambda x: x[1], reverse=True)
-    for category, count in sorted_errors[:5]:
-        print(f"  {category:15} {count:3d} errors")
-    
-    # Print slowest questions
-    if slow_questions:
-        print("\nSlowest processing questions:")
-        slow_questions.sort(key=lambda x: x['processing_time'], reverse=True)
-        for q in slow_questions[:3]:
-            print(f"  {q['processing_time']:5.1f}s - {q['category']} (ID: {q['question_id']})")
+    return analysis_data
 
 def main():
-    """Main analytics viewer"""
-    print("🎯 CPC Test Analytics Viewer")
-    print("="*50)
+    """Main function"""
+    if len(sys.argv) != 2:
+        print("Usage: python analyze_results.py <session_summary_file.json>")
+        print("Example: python analyze_results.py cpc_tests/run_20250628_185014/session_summary_20250628_185014.json")
+        sys.exit(1)
     
-    sessions = load_recent_sessions()
-    if not sessions:
-        return
+    json_file = sys.argv[1]
     
-    print(f"Found {len(sessions)} recent test sessions:")
+    # Load and analyze results
+    results = load_results(json_file)
+    analysis_data = print_and_analyze(results, json_file)
     
-    # Print session summaries
-    for session in sessions:
-        print_session_summary(session)
+    # Save analysis to JSON
+    json_output_path = save_analysis_to_json(analysis_data, json_file)
     
-    # Overall analytics
-    if len(sessions) > 1:
-        print_category_analysis(sessions)
-        print_error_analysis(sessions)
+    if json_output_path:
+        print(f"\n💾 Analysis saved to: {json_output_path}")
+    else:
+        print(f"\n❌ Failed to save analysis to JSON")
     
-    print(f"\n💡 Tip: Review individual session files in cpc_tests/ for detailed question-by-question analysis")
+    print("\n" + "=" * 60)
 
 if __name__ == "__main__":
-    main() 
+    main()

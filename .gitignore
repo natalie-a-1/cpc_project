@@ -160,3 +160,6 @@ checkpoints/
 logs/
 .streamlit/
 secrets.toml
+
+# CPC test results and analysis
+cpc_tests/
